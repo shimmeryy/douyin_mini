@@ -1,7 +1,6 @@
 package main
 
 import (
-	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"tiktok/src/handlers"
 	"tiktok/src/redis"
 	"tiktok/src/service"
+	"tiktok/src/utils/jwt"
 	"time"
 )
 
@@ -120,7 +120,7 @@ func InitAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			})
 		},
 		//token的header的key为Authorization
-		TokenLookup: "header: Authorization, query: token, cookie: jwt",
+		TokenLookup: "header: Authorization, query: token, cookie: jwt, form: token",
 		//对应Authorization的值前缀为Bearer
 		TokenHeadName: "Bearer",
 		TimeFunc:      time.Now,
