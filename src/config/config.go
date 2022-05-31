@@ -11,7 +11,7 @@ func init() {
 	var ViperConfig = viper.New()
 	InitConfig(ViperConfig)
 	if err := ViperConfig.Unmarshal(&AppConfig); err != nil {
-		log.Printf("初始话配置文件失败！")
+		log.Printf("初始化配置文件失败！")
 	}
 }
 
@@ -33,6 +33,7 @@ type Config struct {
 	Server     Server
 	DataSource DataSource
 	Redis      Redis
+	OSS        OSS
 }
 
 type Server struct {
@@ -49,4 +50,12 @@ type Redis struct {
 	Host     string `mapstructure:"host"`
 	Port     string `mapstructure:"port"`
 	Password string `mapstructure:"password"`
+}
+
+type OSS struct {
+	EndPoint        string `mapstructure:"endPoint"`
+	AccessKeyId     string `mapstructure:"accessKeyId"`
+	AccessKeySecret string `mapstructure:"accessKeySecret"`
+	BucketName      string `mapstructure:"bucketName"`
+	Domain          string `mapstructure:"domain"`
 }

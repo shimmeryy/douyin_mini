@@ -13,6 +13,7 @@ import (
 	"tiktok/src/redis"
 	"tiktok/src/service"
 	"tiktok/src/utils/jwt"
+	"tiktok/src/utils/ossUtil"
 	"time"
 )
 
@@ -20,6 +21,7 @@ func main() {
 	r := gin.Default()
 	//config.Init() //初始化配置
 	InitRouter(r) //初始化路由+全局异常捕捉+jwt插件
+	ossUtil.InitBucket()
 	redis.Init()
 	db.Init() //初始化数据库
 	r.Run()
@@ -55,7 +57,7 @@ func InitRouter(r *gin.Engine) {
 
 	// basic apis
 	//apiRouter.GET("/feed/", controller.Feed) //feed流接口
-	//apiRouter.POST("/publish/action/", controller.Publish)  //发布视频
+	apiRouter.POST("/publish/action/", controller.Publish) //发布视频
 	//apiRouter.GET("/publish/list/", controller.PublishList) //发布列表
 	//
 	//// extra apis - I

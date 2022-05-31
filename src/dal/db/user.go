@@ -7,7 +7,7 @@ import (
 
 type User struct {
 	gorm.Model
-	UserName      string `gorm:"column:username;type:varchar(32)not null;comment:用户名""`
+	UserName      string `gorm:"column:username;type:varchar(32)not null;comment:用户名"`
 	PassWord      string `gorm:"column:password;type:varchar(255)not null;comment:密码"`
 	FollowCount   int64  `gorm:"column:follow_count;default:0;comment:关注总数"`
 	FollowerCount int64  `gorm:"column:follower_count;default:0;comment:粉丝总数"`

@@ -36,5 +36,10 @@ func InitTable() {
 			panic(err)
 		}
 	}
+	if !m.HasTable(&Video{}) {
+		if err := m.CreateTable(&Video{}); err != nil {
+			panic(err)
+		}
+	}
 
 }
