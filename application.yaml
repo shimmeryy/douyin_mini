@@ -2,7 +2,7 @@ server:
   port: 8080
 datasource:
   username: root
-  password: root
+  password: 123456
   url: tcp(localhost:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local
 redis:
   host: localhost

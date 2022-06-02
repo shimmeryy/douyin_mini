@@ -71,3 +71,15 @@ func (this *UserServiceImpl) GetUserInfo(ctx context.Context, ID int64) (*handle
 	//2、查询当前用户是否关注对方用户
 	return userInfo, nil
 }
+
+//checkUserById user exist return true ,other return false
+func (this *UserServiceImpl) checkUserById(ctx context.Context, ID int64) bool {
+	user, err := db.QueryUserById(ctx, ID)
+	if err != nil{
+		return false
+	}
+	if user != nil && user.Model.ID == 0 {
+		return false
+	}
+	return true
+}

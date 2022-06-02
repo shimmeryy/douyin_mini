@@ -21,10 +21,14 @@ func InitConfig(viperConfig *viper.Viper) {
 	viperConfig.SetConfigType("yaml")        //设置文件的类型
 	//读取配置
 	if err := viperConfig.ReadInConfig(); err != nil {
-		//预防测试路径时读取配置文件
+		//预防dao测试路径时读取配置文件
 		viperConfig.AddConfigPath("../../../")
 		if err := viperConfig.ReadInConfig(); err != nil {
-			panic(err)
+			//预防service测试路径时读取配置文件
+			viperConfig.AddConfigPath("../../")
+			if err := viperConfig.ReadInConfig(); err != nil {
+				panic(err)
+			}
 		}
 	}
 }
