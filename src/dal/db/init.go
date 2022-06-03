@@ -41,5 +41,14 @@ func InitTable() {
 			panic(err)
 		}
 	}
-
+	if !m.HasTable(&Comment{}) {
+		if err := m.CreateTable(&Comment{}); err != nil {
+			panic(err)
+		}
+	}
+	if !m.HasTable(&Favor{}) {
+		if err := m.CreateTable(&Favor{}); err != nil {
+			panic(err)
+		}
+	}
 }

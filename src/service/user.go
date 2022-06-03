@@ -68,7 +68,7 @@ func (this *UserServiceImpl) GetUserInfo(ctx context.Context, ID int64) (*handle
 		FollowerCount: user.FollowerCount,
 		IsFollow:      false,
 	}
-	//2、查询当前用户是否关注对方用户
+	//2、todo 查看是否关注对方：根据userID、targetUserId来判断，返回true或者false
 	return userInfo, nil
 }
 

@@ -7,7 +7,7 @@ datasource:
 redis:
   host: localhost
   port: 6379
-  password: 524740492
+  password: 123456
 oss:
   endPoint : oss-cn-hangzhou.aliyuncs.com
   accessKeyId : LTAI5tEpSNFxcFEjyCSm3a7b
