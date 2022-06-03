@@ -18,15 +18,7 @@ func (v Video) TableName() string {
 	return "video"
 }
 
-//
-// QueryVideoByAuthor
-//  @Description: 根据作者名字查询视频集
-//  @author XiaoWenzhuo
-//  @param ctx
-//  @param author_id
-//  @return []*Video
-//  @return error
-//
+// QueryVideoByAuthor 根据作者ID查询视频集
 func QueryVideoByAuthor(ctx context.Context, authorId int64) ([]*Video, error) {
 	var res []*Video
 	if err := DB.WithContext(ctx).Where("author_id = ?", authorId).Find(&res).Error; err != nil {
@@ -35,17 +27,19 @@ func QueryVideoByAuthor(ctx context.Context, authorId int64) ([]*Video, error) {
 	return res, nil
 }
 
-//
-// CreateVideo
-//  @Description: 插入视频
-//  @author XiaoWenzhuo
-//  @param ctx
-//  @param video
-//  @return error
-//
+// CreateVideo 插入视频
 func CreateVideo(ctx context.Context, video Video) error {
 	if err := DB.WithContext(ctx).Create(&video).Error; err != nil {
 		return err
 	}
 	return nil
+}
+
+// QueryVideoById 根据ID查询视频
+func QueryVideoById(ctx context.Context, videoId int64) (*Video, error) {
+	var res *Video
+	if err := DB.WithContext(ctx).Where("id = ?", videoId).Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
 }

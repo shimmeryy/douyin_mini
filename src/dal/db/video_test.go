@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"testing"
 )
 
@@ -16,15 +17,14 @@ func TestCreateVideo(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{name: "1", args: args{
 			ctx: context.Background(),
 			video: Video{
 				AuthorId:     1,
-				PlayUrl:      "hello",
-				CoverUrl:     "hello",
+				PlayUrl:      "this is a test",
+				CoverUrl:     "this is a test",
 				CommentCount: 0,
-				Title:        "ok",
+				Title:        "this is a test",
 			},
 		}, wantErr: false},
 	}
@@ -49,10 +49,12 @@ func TestQueryVideoByAuthor(t *testing.T) {
 		want    []*Video
 		wantErr bool
 	}{
-		{name: "1", args: args{
-			ctx:      context.Background(),
-			authorId: 1,
-		},
+		{
+			name: "1",
+			args: args{
+				ctx:      context.Background(),
+				authorId: 1,
+			}, wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -62,7 +64,55 @@ func TestQueryVideoByAuthor(t *testing.T) {
 				t.Errorf("QueryVideoByAuthor() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			t.Logf("%+v", got)
+			for _, res := range got {
+				fmt.Println(res)
+			}
+		})
+	}
+}
+
+func TestQueryVideoById(t *testing.T) {
+	Init()
+	type args struct {
+		ctx     context.Context
+		videoId int64
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *Video
+		wantErr bool
+	}{
+		{
+			name: "1",
+			args: args{
+				ctx:     context.Background(),
+				videoId: 1,
+			}, wantErr: false,
+		},
+		{
+			name: "2",
+			args: args{
+				ctx:     context.Background(),
+				videoId: 2,
+			}, wantErr: false,
+		},
+		{
+			name: "3",
+			args: args{
+				ctx:     context.Background(),
+				videoId: 3,
+			}, wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := QueryVideoById(tt.args.ctx, tt.args.videoId)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("QueryVideoById() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			fmt.Println(got)
 		})
 	}
 }
