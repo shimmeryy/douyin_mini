@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+	"tiktok/src/config"
 	"tiktok/src/constants"
 	"tiktok/src/controller"
 	"tiktok/src/dal/db"
@@ -36,22 +37,22 @@ func InitRouter(r *gin.Engine) {
 	r.Use(RecoverMiddleware)
 
 	//获取认证插件
-	var authMiddleware *jwt.GinJWTMiddleware
-	middleware, err := InitAuthMiddleware()
+
+	mid, err := InitAuthMiddleware()
+	config.AuthMiddleware = mid
 	if err != nil {
 		panic(err)
 	}
-	authMiddleware = middleware
 
 	//设置douyin分组
 	apiRouter := r.Group("/douyin")
 
 	//User：登录、注册、获取用户信息接口
-	apiRouter.POST("/user/login/", authMiddleware.LoginHandler)
+	apiRouter.POST("/user/login/", config.AuthMiddleware.LoginHandler)
 	apiRouter.POST("/user/register/", controller.Register)
 	user := apiRouter.Group("/user")
 	{
-		user.Use(authMiddleware.MiddlewareFunc())
+		user.Use(config.AuthMiddleware.MiddlewareFunc())
 		user.GET("/", controller.GetUserInfo)
 	}
 
@@ -72,7 +73,6 @@ func InitRouter(r *gin.Engine) {
 	//apiRouter.GET("/relation/follower/list/", controller.FollowerList) //粉丝列表
 }
 
-//获取认证插件
 func InitAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Key:        []byte(constants.SecretKey), //秘钥

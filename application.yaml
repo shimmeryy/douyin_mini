@@ -2,8 +2,8 @@ server:
   port: 8080
 datasource:
   username: root
-  password: 123456
-  url: tcp(localhost:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local
+  password: jerry123 #default 123456
+  url: tcp(localhost:3306)/tiktok?charset=utf8mb4&parseTime=True&loc=Local  #default /douyin
 redis:
   host: localhost
   port: 6379
