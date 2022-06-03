@@ -11,6 +11,18 @@ import (
 
 //Register User Register
 func Register(c *gin.Context) {
+	username := c.Query("username")
+	password := c.Query("password")
+
+	print("%#v,%#v", username, password)
+	userService := service.UserServiceInstance()
+
+	response, err := userService.RegisterUser(username, password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, &response)
+		return
+	}
+	c.JSON(http.StatusOK, &response)
 }
 
 //Login User Login
