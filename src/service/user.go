@@ -2,16 +2,26 @@ package service
 
 import (
 	"context"
+	"errors"
 	"sync"
+	"tiktok/src/config"
+	"tiktok/src/constants"
 	"tiktok/src/dal/db"
 	"tiktok/src/errno"
 	"tiktok/src/handlers"
 	"tiktok/src/utils"
+	"tiktok/src/utils/jwt"
 )
 
 type UserService interface {
 	CreateUser()
 	CheckUser(ctx context.Context, req handlers.UserLoginParam) (uint, error)
+}
+type UserRegisterResponse struct {
+	StatusCode int32  `json:"status___code"`
+	StatusMsg  string `json:"status___msg,omitempty"`
+	UserId     int64  `json:"user___id"`
+	Token      string `json:"token"`
 }
 
 var (
@@ -82,4 +92,89 @@ func (this *UserServiceImpl) CheckUserById(ctx context.Context, ID int64) bool {
 		return false
 	}
 	return true
+}
+
+func (this *UserServiceImpl) RegisterUser(username string, password string) (*UserRegisterResponse, error) {
+	if err := this.CheckPassword(password); err != nil {
+		return &UserRegisterResponse{
+			1, "密码过长或为空", 0, "",
+		}, err
+	}
+
+	var usr db.User
+	db.DB.Where("username=?", username).Find(&usr)
+	if usr.ID > 0 { //用户名已注册
+		return &UserRegisterResponse{1, "用户名已存在", 0, ""}, errors.New("用户名已存在")
+	} else {
+		//创建用户
+		saltPassword, err := utils.HashAndSalt(password)
+		if err != nil {
+			return &UserRegisterResponse{
+				1,
+				"加密失败",
+				0,
+				"",
+			}, err
+		}
+		db.DB.Create(&db.User{UserName: username, PassWord: saltPassword, FollowCount: 0, FollowerCount: 0})
+		var u db.User
+		db.DB.Where("username=?", username).Find(&u)
+		tokenString, err := this.GetToken(&u)
+		if err != nil {
+			return &UserRegisterResponse{
+				1,
+				"token获取失败",
+				0,
+				"",
+			}, err
+		}
+		return &UserRegisterResponse{
+			1,
+			"用户创建成功",
+			int64(u.ID),
+			tokenString,
+		}, nil
+	}
+}
+
+func (this *UserServiceImpl) CheckPassword(password string) error {
+	length := len(password)
+	if length == 0 {
+		return errors.New("密码不能为空")
+	}
+	if length > constants.MaxPasswordlength {
+		return errors.New("密码长度过长")
+	}
+	return nil
+}
+
+//func (this *UserServiceImpl) GetToken2(user *db.User) (string, error) {
+//	expiresTime := time.Now().Add(7 * 24 * time.Hour)
+//	claims := jwt.StandardClaims{
+//		Audience:  user.UserName,      // 受众
+//		ExpiresAt: expiresTime.Unix(), // 失效时间
+//		Id:        string(user.ID),    // 编号
+//		IssuedAt:  time.Now().Unix(),  // 签发时间
+//		Issuer:    "gin hello",        // 签发人
+//		NotBefore: time.Now().Unix(),  // 生效时间
+//		Subject:   "login",            // 主题
+//	}
+//	var jwtSecret = []byte("jklasdfi.as")
+//	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+//	token, err := tokenClaims.SignedString(jwtSecret)
+//	if err != nil {
+//		return "", err
+//	}
+//	return token, nil
+//}
+
+func (this *UserServiceImpl) GetToken(user *db.User) (string, error) {
+	s, _, err := config.AuthMiddleware.TokenGenerator(jwt.MapClaims{
+		//对应的id
+		constants.IdentityKey: user.ID,
+	})
+	if err != nil {
+		return "", err
+	}
+	return s, err
 }
