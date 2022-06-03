@@ -72,10 +72,10 @@ func (this *UserServiceImpl) GetUserInfo(ctx context.Context, ID int64) (*handle
 	return userInfo, nil
 }
 
-//checkUserById user exist return true ,other return false
-func (this *UserServiceImpl) checkUserById(ctx context.Context, ID int64) bool {
+// CheckUserById user exist return true ,other return false
+func (this *UserServiceImpl) CheckUserById(ctx context.Context, ID int64) bool {
 	user, err := db.QueryUserById(ctx, ID)
-	if err != nil{
+	if err != nil {
 		return false
 	}
 	if user != nil && user.Model.ID == 0 {
