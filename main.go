@@ -114,7 +114,7 @@ func InitAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			userID, _ := c.Get(constants.IdentityKey)
 			c.JSON(http.StatusOK, &handlers.UserLoginResponse{
 				Response: handlers.Response{
-					StatusCode: http.StatusOK,
+					StatusCode: 0,
 					StatusMsg:  "登录成功",
 				},
 				UserId: userID.(int64),

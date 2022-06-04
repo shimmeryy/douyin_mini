@@ -33,7 +33,7 @@ func Register(c *gin.Context) {
 func GetUserInfo(c *gin.Context) {
 	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	if err != nil {
-		panic(errno.ServiceErr.WithMessage("参数ID有误"))
+		panic(errno.ParamErr)
 	}
 	userInfo, err := service.UserServiceInstance().GetUserInfo(c, userId)
 	if err != nil {
@@ -41,7 +41,7 @@ func GetUserInfo(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, &handlers.UserInfoResponse{
 		Response: handlers.Response{
-			StatusCode: 200,
+			StatusCode: 0,
 			StatusMsg:  "成功",
 		},
 		User: *userInfo,
