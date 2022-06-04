@@ -5,7 +5,8 @@ import (
 	"testing"
 )
 
-func Test_db_user(t *testing.T)  {
+func Test_db_user(t *testing.T) {
 	Init()
-	fmt.Println(QueryUser(nil, "changlu"))
+	user, _ := QueryUser(nil, "changlu")
+	fmt.Println(user)
 }

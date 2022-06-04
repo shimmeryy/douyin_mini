@@ -34,3 +34,7 @@ func QueryUserById(ctx context.Context, ID int64) (*User, error) {
 	}
 	return res, nil
 }
+
+//func AddUserFollowCountById(ctx context.Context, ID int64) error {
+//
+//}
