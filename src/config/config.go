@@ -3,9 +3,11 @@ package config
 import (
 	"github.com/spf13/viper"
 	"log"
+	"tiktok/src/utils/jwt"
 )
 
 var AppConfig *Config
+var AuthMiddleware *jwt.GinJWTMiddleware
 
 func init() {
 	var ViperConfig = viper.New()
