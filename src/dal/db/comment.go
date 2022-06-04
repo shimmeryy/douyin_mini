@@ -34,9 +34,18 @@ func CreateCommentInfo(ctx context.Context, comment Comment) error {
 }
 
 // DeleteCommentInfo 根据commentId删除评论
-func DeleteCommentInfo(ctx context.Context, commentId int) error {
+func DeleteCommentInfo(ctx context.Context, commentId int64) error {
 	if err := DB.WithContext(ctx).Delete(&Comment{}, commentId).Error; err != nil {
 		return err
 	}
 	return nil
+}
+
+// CountCommentByVideoId 根据videoId查询评论数量
+func CountCommentByVideoId(ctx context.Context, videoId int64) (int64, error) {
+	var cnt int64
+	if err := DB.WithContext(ctx).Model(&Comment{}).Where("video_id = ?", videoId).Count(&cnt).Error; err != nil {
+		return cnt, err
+	}
+	return cnt, nil
 }

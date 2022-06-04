@@ -17,6 +17,6 @@ func init() {
 
 }
 
-func test01(v any) {
+func test01(v interface{}) {
 	fmt.Println(v)
 }

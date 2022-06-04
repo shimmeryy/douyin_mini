@@ -73,7 +73,7 @@ func TestDeleteCommentInfo(t *testing.T) {
 	Init()
 	type argument struct {
 		ctx       context.Context
-		commentId int
+		commentId int64
 	}
 	tests := []struct {
 		name    string
@@ -91,6 +91,36 @@ func TestDeleteCommentInfo(t *testing.T) {
 			if err := DeleteCommentInfo(tt.args.ctx, tt.args.commentId); (err != nil) != tt.wantErr {
 				t.Errorf("DeleteCommentInfo() error = %v, wantErr %v", err, tt.wantErr)
 			}
+		})
+	}
+}
+
+func TestCountCommentByVideoId(t *testing.T) {
+	Init()
+	type argument struct {
+		ctx     context.Context
+		videoId int64
+	}
+	tests := []struct {
+		name    string
+		args    argument
+		wantErr bool
+	}{
+		{
+			name: "1", args: argument{
+				ctx:     context.Background(),
+				videoId: 10,
+			}, wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cnt, err := CountCommentByVideoId(tt.args.ctx, tt.args.videoId)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CountCommentByVideoId() error = %v, wantErr = %v", err, tt.wantErr)
+			}
+			fmt.Println(cnt)
 		})
 	}
 }

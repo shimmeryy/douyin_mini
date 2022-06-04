@@ -103,3 +103,72 @@ func TestDeleteFavorInfo(t *testing.T) {
 		})
 	}
 }
+
+func TestCountFavorByVideoId(t *testing.T) {
+	Init()
+	type argument struct {
+		ctx     context.Context
+		videoId int64
+	}
+	tests := []struct {
+		name    string
+		args    argument
+		wantErr bool
+	}{
+		{
+			name: "1", args: argument{
+				ctx:     context.Background(),
+				videoId: 15,
+			}, wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := CountFavorByVideoId(tt.args.ctx, tt.args.videoId)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CountFavorByVideoId() error = %v, wantErr = %v", err, tt.wantErr)
+			}
+			fmt.Println(res)
+		})
+	}
+}
+
+func TestCheckIsFavored(t *testing.T) {
+	Init()
+	type argument struct {
+		ctx     context.Context
+		userId  int64
+		videoId int64
+	}
+	tests := []struct {
+		name    string
+		args    argument
+		wantErr bool
+	}{
+		{
+			name: "1", args: argument{
+				ctx:     context.Background(),
+				userId:  1,
+				videoId: 15,
+			}, wantErr: false,
+		},
+		{
+			name: "2", args: argument{
+				ctx:     context.Background(),
+				userId:  1,
+				videoId: 999,
+			}, wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := CheckIsFavored(tt.args.ctx, tt.args.userId, tt.args.videoId)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CheckIsFavored() error = %v, wantErr = %v", err, tt.wantErr)
+			}
+			fmt.Println(res)
+		})
+	}
+}

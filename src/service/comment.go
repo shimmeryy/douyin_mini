@@ -29,13 +29,16 @@ func CommentServiceInstance() *CommentServiceImpl {
 type CommentServiceImpl struct {
 }
 
-func (this *CommentServiceImpl) OperateComment(ctx context.Context, req handlers.CommentUpdateParam) error {
+func (this *CommentServiceImpl) OperateComment(ctx context.Context, req handlers.CommentOperateParam) error {
 	// check UserId is valid or not
 	if flag := UserServiceInstance().CheckUserById(ctx, req.UserId); flag != true {
 		return errors.New("invalid userId")
 	}
 
-	// TODO 检验videoId是否合法
+	// check VideoId is valid or not
+	if flag := VideoServiceInstance().CheckVideoById(ctx, req.VideoId); flag != true {
+		return errors.New("invalid videoId")
+	}
 
 	// ActionType == 2 delete comment
 	if req.ActionType == 2 {
@@ -63,4 +66,12 @@ func (this *CommentServiceImpl) QueryCommentByVideoId(ctx context.Context, req h
 		return nil, err
 	}
 	return res, nil
+}
+
+func (this *CommentServiceImpl) CountCommentByVideoId(ctx context.Context, req handlers.CommentQueryParam) (int64, error) {
+	cnt, err := db.CountCommentByVideoId(ctx, req.VideoId)
+	if err != nil {
+		return cnt, err
+	}
+	return cnt, nil
 }

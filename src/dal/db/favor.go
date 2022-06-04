@@ -39,3 +39,24 @@ func DeleteFavorInfo(ctx context.Context, userId int64, videoId int64) error {
 	}
 	return nil
 }
+
+// CountFavorByVideoId 根据videoId获取赞数量
+func CountFavorByVideoId(ctx context.Context, videoId int64) (int64, error) {
+	var count int64
+	if err := DB.WithContext(ctx).Model(&Favor{}).Where("video_id = ?", videoId).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
+}
+
+// CheckIsFavored 根据UserId和VideoId来检查是否用户点赞过该视频
+func CheckIsFavored(ctx context.Context, userId int64, videoId int64) (bool, error) {
+	var cnt int64
+	if err := DB.WithContext(ctx).Model(&Favor{}).Where("user_id = ? AND video_id = ?", userId, videoId).Count(&cnt).Error; err != nil {
+		return false, err
+	}
+	if cnt == 0 {
+		return false, nil
+	}
+	return true, nil
+}
