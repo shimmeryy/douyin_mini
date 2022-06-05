@@ -24,3 +24,13 @@ type UserInfo struct {
 	FollowerCount int64  `json:"follower_count"`
 	IsFollow      bool   `json:"is_follow"`
 }
+
+type UserFollowersResponse struct {
+	Response
+	Followers []UserInfo `json:"followers"`
+}
+
+type UserFansResponse struct {
+	Response
+	Fans []UserInfo `json:"fans"`
+}
