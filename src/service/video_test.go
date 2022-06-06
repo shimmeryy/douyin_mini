@@ -138,3 +138,69 @@ func TestGetVideosByAuthor(t *testing.T) {
 		})
 	}
 }
+
+func TestVideoServiceImpl_CreateVideo(t *testing.T) {
+	type args struct {
+		ctx context.Context
+		req handlers.PublishParams
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			this := &VideoServiceImpl{}
+			if err := this.CreateVideo(tt.args.ctx, tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf("CreateVideo() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestVideoServiceImpl_GetVideosByAuthor(t *testing.T) {
+	type args struct {
+		ctx    context.Context
+		userId int64
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantList []*db.Video
+		wantErr  bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			this := &VideoServiceImpl{}
+			gotList, err := this.GetVideosByAuthor(tt.args.ctx, tt.args.userId)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetVideosByAuthor() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotList, tt.wantList) {
+				t.Errorf("GetVideosByAuthor() gotList = %v, want %v", gotList, tt.wantList)
+			}
+		})
+	}
+}
+
+func TestVideoServiceInstance(t *testing.T) {
+	tests := []struct {
+		name string
+		want *VideoServiceImpl
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := VideoServiceInstance(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("VideoServiceInstance() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

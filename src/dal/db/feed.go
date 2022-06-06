@@ -2,28 +2,18 @@ package db
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"tiktok/src/constants"
 	"time"
 )
 
-type Feed struct {
-	gorm.Model
-	AuthorId     int64  `gorm:"column:author_id;type:bigint(20)not null;comment:作者id"`
-	PlayUrl      string `gorm:"column:play_url;type:varchar(255)not null;comment:视频播放地址"`
-	CoverUrl     string `gorm:"column:cover_url;type:varchar(255)not null;comment:视频封面地址"`
-	CommentCount int64  `gorm:"column:comment_count;type:int(20);default:0;comment:评论数"`
-	Title        string `gorm:"column:title;type:varchar(255)not null;comment:视频标题"`
-}
-
 // 返回按投稿时间倒序的视频列表,最多30个
-func QueryByTime(ctx context.Context, last_time time.Time) ([]*Feed, error) {
-	var VideoList []*Feed
+func QueryByTime(ctx context.Context, lastTime int64) ([]*Video, error) {
+	var VideoList []*Video
 
-	if err := DB.WithContext(ctx).Where("CreatedAt <= ?",
-		last_time.Format("2022-06-03 22:54:05")).
-		Preload("AuthorId").
-		Order("UpdatedAt DESC").
+	if err := DB.WithContext(ctx).Where("created_at <= ?",
+		time.Unix(lastTime, 0).Format("2006-01-02 15-04-05")).
+		//Preload("author_id").
+		Order("created_at DESC").
 		Limit(constants.MaxVideoNum).
 		Find(&VideoList).Error; err != nil {
 		return nil, err

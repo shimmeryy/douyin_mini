@@ -57,7 +57,7 @@ func InitRouter(r *gin.Engine) {
 	}
 
 	// basic apis
-	//apiRouter.GET("/feed/", controller.Feed) //feed流接口
+	apiRouter.GET("/feed/", controller.Feed)               //feed流接口
 	apiRouter.POST("/publish/action/", controller.Publish) //发布视频
 	//apiRouter.GET("/publish/list/", controller.PublishList) //发布列表
 	//

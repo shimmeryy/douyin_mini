@@ -74,9 +74,20 @@ func (this *VideoServiceImpl) GetVideoById(ctx context.Context, id int64) (video
 	if video != nil && video.ID == 0 {
 		return nil, errno.ServiceErr.WithMessage("视频不存在")
 	}
+	user, err := db.QueryUserById(ctx, video.AuthorId)
+	if err != nil {
+		return nil, errno.ServiceErr.WithMessage("用户不存在")
+	}
+
 	videoInfo = &handlers.VideoInfo{
-		ID:           int64(video.ID),
-		AuthorId:     video.AuthorId,
+		ID: int64(video.ID),
+		Author: handlers.UserInfo{
+			ID:            int64(user.ID),
+			UserName:      user.UserName,
+			FollowCount:   user.FollowCount,
+			FollowerCount: user.FollowerCount,
+			IsFollow:      false,
+		},
 		PlayUrl:      video.PlayUrl,
 		CoverUrl:     video.CoverUrl,
 		CommentCount: video.CommentCount,
