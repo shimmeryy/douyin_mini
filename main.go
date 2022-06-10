@@ -55,11 +55,15 @@ func InitRouter(r *gin.Engine) {
 		user.Use(config.AuthMiddleware.MiddlewareFunc())
 		user.GET("/", controller.GetUserInfo)
 	}
-
+	feed := apiRouter.Group("/feed")
+	{
+		feed.Use(config.AuthMiddleware.MiddlewareFunc())
+		feed.GET("/", controller.Feed)
+	}
 	// basic apis
-	apiRouter.GET("/feed/", controller.Feed)               //feed流接口
-	apiRouter.POST("/publish/action/", controller.Publish) //发布视频
-	//apiRouter.GET("/publish/list/", controller.PublishList) //发布列表
+	//apiRouter.GET("/feed/", controller.Feed)                //feed流接口
+	apiRouter.POST("/publish/action/", controller.Publish)  //发布视频
+	apiRouter.GET("/publish/list/", controller.PublishList) //发布列表
 	//
 	//// extra apis - I
 	//apiRouter.POST("/favorite/action/", controller.FavoriteAction) //点赞

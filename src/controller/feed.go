@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -17,7 +18,10 @@ func Feed(c *gin.Context) {
 	var lastTime int64
 	//token
 	claims := jwt.ExtractClaims(c)
+	fmt.Printf("%+v", claims)
 	userID := int64(claims[constants.IdentityKey].(float64))
+	fmt.Printf("%+v", userID)
+
 	strTime := c.Query("latest_time")
 	if strTime == "" {
 		lastTime = time.Now().Unix()
@@ -30,6 +34,7 @@ func Feed(c *gin.Context) {
 	}
 	//取video列表的最后一个元素的下标
 	lastIndex := len(videoList) - 1
+	fmt.Printf("lastIndex:%d", lastIndex)
 	lastTime = videoList[lastIndex].CreatedAt.Unix()
 
 	feedInfoList := make([]handlers.FeedInfo, len(videoList))

@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"gorm.io/gorm"
-	"tiktok/src/handlers"
 )
 
 type Video struct {
@@ -13,16 +12,6 @@ type Video struct {
 	CoverUrl     string `gorm:"column:cover_url;type:varchar(255)not null;comment:视频封面地址"`
 	CommentCount int64  `gorm:"column:comment_count;type:int(20);default:0;comment:评论数"`
 	Title        string `gorm:"column:title;type:varchar(255)not null;comment:视频标题"`
-}
-type PublishInfo struct {
-	ID            int64             `json:"id"`
-	Author        handlers.UserInfo `json:"author"`
-	PlayUrl       string            `json:"play_url"`
-	CoverUrl      string            `json:"cover_url"`
-	FavoriteCount int64             `json:"favorite_count"`
-	IsFavorite    bool              `json:"is_favorite"`
-	CommentCount  int64             `json:"comment_count"`
-	Title         string            `json:"title"`
 }
 
 func (v Video) TableName() string {

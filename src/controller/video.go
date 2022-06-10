@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"tiktok/src/constants"
 	"tiktok/src/errno"
 	"tiktok/src/handlers"
@@ -37,22 +39,29 @@ func Publish(c *gin.Context) {
 
 //PublishList 发布列表
 func PublishList(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	userID := int64(claims[constants.IdentityKey].(float64))
-	list, err := service.VideoServiceInstance().GetVideosByAuthor(c, userID)
+	//claims := jwt.ExtractClaims(c)
+	//userID := int64(claims[constants.IdentityKey].(float64))
+	userID := c.Query("user_id")
+	ID, err2 := strconv.Atoi(userID)
+	if err2 != nil {
+		panic(errno.ServiceErr.WithMessage("参数异常"))
+	}
+
+	list, err := service.VideoServiceInstance().GetVideosByAuthor(c, int64(ID))
 	if err != nil {
 		panic(errno.ServiceErr.WithMessage(err.Error()))
 	}
 
 	publishList := make([]handlers.VideoInfo, len(list))
 	for i := range list {
+
 		videoId := int64(list[i].ID)
 		authorInfo, err := service.UserServiceInstance().GetUserInfo(c, list[i].AuthorId)
 		if err != nil {
 			panic(errno.ServiceErr.WithMessage(err.Error()))
 		}
 		favored, err := service.FavorServiceInstance().CheckIsFavored(c, handlers.FavorCheckParam{
-			UserId:  userID,
+			UserId:  int64(ID),
 			VideoId: videoId,
 		})
 		if err != nil {
@@ -78,6 +87,7 @@ func PublishList(c *gin.Context) {
 		}
 		publishList[i] = *info
 	}
+	fmt.Printf("%+v\n", publishList)
 	res := &handlers.PublishListResponse{
 		Response: handlers.Response{
 			StatusCode: 0,
