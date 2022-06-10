@@ -94,7 +94,7 @@ func (this *UserServiceImpl) CheckUserById(ctx context.Context, ID int64) bool {
 	return true
 }
 
-func (this *UserServiceImpl) RegisterUser(username string, password string) (*UserRegisterResponse, error) {
+func (this *UserServiceImpl) RegisterUser(c context.Context, username string, password string) (*UserRegisterResponse, error) {
 	if err := this.CheckPassword(password); err != nil {
 		return &UserRegisterResponse{
 			1, "密码过长或为空", 0, "",
@@ -102,7 +102,7 @@ func (this *UserServiceImpl) RegisterUser(username string, password string) (*Us
 	}
 
 	var usr db.User
-	db.DB.Where("username=?", username).Find(&usr)
+	db.DB.WithContext(c).Where("username=?", username).Find(&usr)
 	if usr.ID > 0 { //用户名已注册
 		return &UserRegisterResponse{1, "用户名已存在", 0, ""}, errors.New("用户名已存在")
 	} else {
@@ -116,11 +116,12 @@ func (this *UserServiceImpl) RegisterUser(username string, password string) (*Us
 				"",
 			}, err
 		}
-		db.DB.Create(&db.User{UserName: username, PassWord: saltPassword, FollowCount: 0, FollowerCount: 0})
+		db.DB.WithContext(c).Create(&db.User{UserName: username, PassWord: saltPassword, FollowCount: 0, FollowerCount: 0})
 		var u db.User
-		db.DB.Where("username=?", username).Find(&u)
+		db.DB.WithContext(c).Where("username=?", username).Find(&u)
 		tokenString, err := this.GetToken(&u)
 		if err != nil {
+			db.DB.WithContext(c).Delete(&u)
 			return &UserRegisterResponse{
 				1,
 				"token获取失败",
@@ -129,7 +130,7 @@ func (this *UserServiceImpl) RegisterUser(username string, password string) (*Us
 			}, err
 		}
 		return &UserRegisterResponse{
-			1,
+			0,
 			"用户创建成功",
 			int64(u.ID),
 			tokenString,

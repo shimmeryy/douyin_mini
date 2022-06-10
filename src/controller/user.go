@@ -17,7 +17,7 @@ func Register(c *gin.Context) {
 	print("%#v,%#v", username, password)
 	userService := service.UserServiceInstance()
 
-	response, err := userService.RegisterUser(username, password)
+	response, err := userService.RegisterUser(c, username, password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, &response)
 		return
