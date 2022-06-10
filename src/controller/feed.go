@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"tiktok/src/constants"
+	"tiktok/src/errno"
 	"tiktok/src/handlers"
 	"tiktok/src/service"
 	"tiktok/src/utils/jwt"
@@ -37,27 +38,32 @@ func Feed(c *gin.Context) {
 		videoId := int64(videoList[i].ID)
 		authorInfo, err := service.UserServiceInstance().GetUserInfo(c, videoList[i].AuthorId)
 		if err != nil {
-			panic(err)
+			panic(errno.ServiceErr.WithMessage(err.Error()))
 		}
 		favored, err := service.FavorServiceInstance().CheckIsFavored(c, handlers.FavorCheckParam{
 			UserId:  userID,
 			VideoId: videoId,
 		})
 		if err != nil {
-			panic(err)
+			panic(errno.ServiceErr.WithMessage(err.Error()))
 		}
 		commentCount, err := service.CommentServiceInstance().CountCommentByVideoId(c, handlers.CommentQueryParam{VideoId: videoId})
 		if err != nil {
-			panic(err)
+			panic(errno.ServiceErr.WithMessage(err.Error()))
+		}
+		countFavor, err := service.FavorServiceInstance().CountFavorByVideoId(c, handlers.FavorCountParam{VideoId: videoId})
+		if err != nil {
+			panic(errno.ServiceErr.WithMessage(err.Error()))
 		}
 		info := &handlers.FeedInfo{
-			ID:           videoId,
-			Author:       *authorInfo,
-			PlayUrl:      videoList[i].PlayUrl,
-			CoverUrl:     videoList[i].CoverUrl,
-			IsFavorite:   favored,
-			CommentCount: commentCount,
-			Title:        videoList[i].Title,
+			ID:            videoId,
+			Author:        *authorInfo,
+			PlayUrl:       videoList[i].PlayUrl,
+			CoverUrl:      videoList[i].CoverUrl,
+			FavoriteCount: countFavor,
+			IsFavorite:    favored,
+			CommentCount:  commentCount,
+			Title:         videoList[i].Title,
 		}
 		feedInfoList[i] = *info
 	}

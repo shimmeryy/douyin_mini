@@ -17,7 +17,7 @@ func Publish(c *gin.Context) {
 	title := c.PostForm("title")
 	file, err := c.FormFile("data")
 	if err != nil {
-		panic(errno.ServiceErr.WithMessage("文件格式错误"))
+		panic(errno.ParamErr)
 	}
 	err = service.VideoServiceInstance().CreateVideo(c, handlers.PublishParams{
 		Data:   file,
@@ -25,7 +25,7 @@ func Publish(c *gin.Context) {
 		Title:  title,
 	})
 	if err != nil {
-		panic(errno.ServiceErr.WithMessage(err.Error()))
+		panic(errno.ServiceErr.WithMessage("创建失败"))
 	}
 	c.JSON(http.StatusOK, &handlers.UploadResponse{
 		Response: handlers.Response{
@@ -35,9 +35,55 @@ func Publish(c *gin.Context) {
 	})
 }
 
-//TODO PublishList
-//func PublishList(c gin.Context) {
-//	token := c.Query("token")
-//	userId := c.Query("user_id")
-//
-//}
+//PublishList 发布列表
+func PublishList(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+	userID := int64(claims[constants.IdentityKey].(float64))
+	list, err := service.VideoServiceInstance().GetVideosByAuthor(c, userID)
+	if err != nil {
+		panic(errno.ServiceErr.WithMessage(err.Error()))
+	}
+
+	publishList := make([]handlers.VideoInfo, len(list))
+	for i := range list {
+		videoId := int64(list[i].ID)
+		authorInfo, err := service.UserServiceInstance().GetUserInfo(c, list[i].AuthorId)
+		if err != nil {
+			panic(errno.ServiceErr.WithMessage(err.Error()))
+		}
+		favored, err := service.FavorServiceInstance().CheckIsFavored(c, handlers.FavorCheckParam{
+			UserId:  userID,
+			VideoId: videoId,
+		})
+		if err != nil {
+			panic(errno.ServiceErr.WithMessage(err.Error()))
+		}
+		commentCount, err := service.CommentServiceInstance().CountCommentByVideoId(c, handlers.CommentQueryParam{VideoId: videoId})
+		if err != nil {
+			panic(errno.ServiceErr.WithMessage(err.Error()))
+		}
+		countFavor, err := service.FavorServiceInstance().CountFavorByVideoId(c, handlers.FavorCountParam{VideoId: videoId})
+		if err != nil {
+			panic(errno.ServiceErr.WithMessage(err.Error()))
+		}
+		info := &handlers.VideoInfo{
+			ID:            videoId,
+			Author:        *authorInfo,
+			PlayUrl:       list[i].PlayUrl,
+			CoverUrl:      list[i].CoverUrl,
+			FavoriteCount: countFavor,
+			IsFavorite:    favored,
+			CommentCount:  commentCount,
+			Title:         list[i].Title,
+		}
+		publishList[i] = *info
+	}
+	res := &handlers.PublishListResponse{
+		Response: handlers.Response{
+			StatusCode: 0,
+			StatusMsg:  "获取成功",
+		},
+		VideoList: publishList,
+	}
+	c.JSON(http.StatusOK, res)
+}

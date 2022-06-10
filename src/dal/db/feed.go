@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// 返回按投稿时间倒序的视频列表,最多30个
+//QueryByTime 返回按投稿时间倒序的视频列表,最多30个
 func QueryByTime(ctx context.Context, lastTime int64) ([]*Video, error) {
 	var VideoList []*Video
 
