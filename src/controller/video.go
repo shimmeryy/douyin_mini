@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -87,7 +86,7 @@ func PublishList(c *gin.Context) {
 		}
 		publishList[i] = *info
 	}
-	fmt.Printf("%+v\n", publishList)
+	//fmt.Printf("%+v\n", publishList)
 	res := &handlers.PublishListResponse{
 		Response: handlers.Response{
 			StatusCode: 0,

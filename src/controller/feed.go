@@ -3,13 +3,14 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"net/http"
 	"strconv"
+	"tiktok/src/config"
 	"tiktok/src/constants"
 	"tiktok/src/errno"
 	"tiktok/src/handlers"
 	"tiktok/src/service"
-	"tiktok/src/utils/jwt"
 	"time"
 )
 
@@ -17,11 +18,19 @@ func Feed(c *gin.Context) {
 	// latestTime
 	var lastTime int64
 	//token
-	claims := jwt.ExtractClaims(c)
-	fmt.Printf("%+v", claims)
-	userID := int64(claims[constants.IdentityKey].(float64))
-	fmt.Printf("%+v", userID)
+	//claims := jwtUitl.ExtractClaims(c)
+	//fmt.Printf("%+v", claims)
 
+	tokenString := c.Query("token")
+	var userID int64
+	if token, err := config.AuthMiddleware.ParseTokenString(tokenString); err == nil {
+		for key, value := range token.Claims.(jwt.MapClaims) {
+			if key == constants.IdentityKey {
+				userID = int64(value.(float64))
+			}
+		}
+	}
+	fmt.Printf("%+v", userID)
 	strTime := c.Query("latest_time")
 	if strTime == "" {
 		lastTime = time.Now().Unix()
@@ -34,8 +43,13 @@ func Feed(c *gin.Context) {
 	}
 	//取video列表的最后一个元素的下标
 	lastIndex := len(videoList) - 1
-	fmt.Printf("lastIndex:%d", lastIndex)
-	lastTime = videoList[lastIndex].CreatedAt.Unix()
+	//fmt.Printf("lastIndex:%d", lastIndex)
+	//当视频全部播放完之后设置lastTime为当前时间 开始循环播放
+	if lastIndex == -1 {
+		lastTime = time.Now().Unix()
+	} else {
+		lastTime = videoList[lastIndex].CreatedAt.Unix()
+	}
 
 	feedInfoList := make([]handlers.FeedInfo, len(videoList))
 

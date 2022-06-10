@@ -44,11 +44,11 @@ func (this *VideoServiceImpl) CreateVideo(ctx context.Context, req handlers.Publ
 	if err != nil {
 		return errno.ServiceErr.WithMessage("上传失败")
 	}
-	//TODO 需要更改封面URL
+
 	err = db.CreateVideo(ctx, db.Video{
 		AuthorId: userId,
 		PlayUrl:  url,
-		CoverUrl: url,
+		CoverUrl: url + "?x-oss-process=video/snapshot,t_500,f_jpg,w_600,h_800,m_fast",
 		Title:    title,
 	})
 	if err != nil {
@@ -88,10 +88,9 @@ func (this *VideoServiceImpl) GetVideoById(ctx context.Context, id int64) (video
 			FollowerCount: user.FollowerCount,
 			IsFollow:      false,
 		},
-		PlayUrl:      video.PlayUrl,
-		CoverUrl:     video.CoverUrl,
-		CommentCount: video.CommentCount,
-		Title:        video.Title,
+		PlayUrl:  video.PlayUrl,
+		CoverUrl: video.CoverUrl,
+		Title:    video.Title,
 	}
 	return videoInfo, nil
 }

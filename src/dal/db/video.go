@@ -7,11 +7,10 @@ import (
 
 type Video struct {
 	gorm.Model
-	AuthorId     int64  `gorm:"column:author_id;type:bigint(20)not null;comment:作者id"`
-	PlayUrl      string `gorm:"column:play_url;type:varchar(255)not null;comment:视频播放地址"`
-	CoverUrl     string `gorm:"column:cover_url;type:varchar(255)not null;comment:视频封面地址"`
-	CommentCount int64  `gorm:"column:comment_count;type:int(20);default:0;comment:评论数"`
-	Title        string `gorm:"column:title;type:varchar(255)not null;comment:视频标题"`
+	AuthorId int64  `gorm:"column:author_id;type:bigint(20)not null;comment:作者id"`
+	PlayUrl  string `gorm:"column:play_url;type:varchar(255)not null;comment:视频播放地址"`
+	CoverUrl string `gorm:"column:cover_url;type:varchar(255)not null;comment:视频封面地址"`
+	Title    string `gorm:"column:title;type:varchar(255)not null;comment:视频标题"`
 }
 
 func (v Video) TableName() string {
