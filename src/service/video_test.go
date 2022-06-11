@@ -50,8 +50,9 @@ func TestCheckVideoById(t *testing.T) {
 func TestGetVideoById(t *testing.T) {
 	dal.Init()
 	type args struct {
-		ctx context.Context
-		id  int64
+		ctx     context.Context
+		videoId int64
+		userId  int64
 	}
 	tests := []struct {
 		name          string
@@ -62,22 +63,25 @@ func TestGetVideoById(t *testing.T) {
 		{
 			name: "1",
 			args: args{
-				ctx: context.Background(),
-				id:  1,
+				ctx:     context.Background(),
+				videoId: 1,
+				userId:  1,
 			},
 		},
 		{
 			name: "2",
 			args: args{
-				ctx: context.Background(),
-				id:  2,
+				ctx:     context.Background(),
+				videoId: 2,
+				userId:  1,
 			},
 		},
 		{
 			name: "3",
 			args: args{
-				ctx: context.Background(),
-				id:  10086,
+				ctx:     context.Background(),
+				videoId: 10086,
+				userId:  1,
 			},
 			wantErr: true,
 		},
@@ -85,7 +89,7 @@ func TestGetVideoById(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			this := &VideoServiceImpl{}
-			gotVideoInfo, err := this.GetVideoById(tt.args.ctx, tt.args.id)
+			gotVideoInfo, err := this.GetVideoById(tt.args.ctx, tt.args.videoId, tt.args.userId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVideoById() error = %v, wantErr %v", err, tt.wantErr)
 				return

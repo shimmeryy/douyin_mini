@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"tiktok/src/config"
 	"tiktok/src/constants"
@@ -16,12 +17,6 @@ import (
 type UserService interface {
 	CreateUser()
 	CheckUser(ctx context.Context, req handlers.UserLoginParam) (uint, error)
-}
-type UserRegisterResponse struct {
-	StatusCode int32  `json:"status___code"`
-	StatusMsg  string `json:"status___msg,omitempty"`
-	UserId     int64  `json:"user___id"`
-	Token      string `json:"token"`
 }
 
 var (
@@ -37,11 +32,11 @@ func UserServiceInstance() *UserServiceImpl {
 	return userService
 }
 
-//用户业务层实现类
+// UserServiceImpl 用户业务层实现类
 type UserServiceImpl struct {
 }
 
-//检测用户是否存在
+// CheckUser 检测用户是否存在
 func (this *UserServiceImpl) CheckUser(ctx context.Context, req handlers.UserLoginParam) (int64, error) {
 	name := req.UserName
 	//1、用户是否存在
@@ -55,10 +50,6 @@ func (this *UserServiceImpl) CheckUser(ctx context.Context, req handlers.UserLog
 		return 0, errno.LoginErr
 	}
 	return int64(user.ID), nil
-}
-
-func (this *UserServiceImpl) CreateUser(ctx context.Context) {
-	panic("implement me")
 }
 
 func (this *UserServiceImpl) GetUserInfo(ctx context.Context, ID int64) (*handlers.UserInfo, error) {
@@ -94,26 +85,25 @@ func (this *UserServiceImpl) CheckUserById(ctx context.Context, ID int64) bool {
 	return true
 }
 
-func (this *UserServiceImpl) RegisterUser(c context.Context, username string, password string) (*UserRegisterResponse, error) {
+func (this *UserServiceImpl) RegisterUser(c context.Context, username string, password string) (*handlers.UserRegisterResponse, error) {
 	if err := this.CheckPassword(password); err != nil {
-		return &UserRegisterResponse{
-			1, "密码过长或为空", 0, "",
+		return &handlers.UserRegisterResponse{
+			StatusCode: 1,
+			StatusMsg:  "密码过长或为空",
 		}, err
 	}
 
 	var usr db.User
 	db.DB.WithContext(c).Where("username=?", username).Find(&usr)
 	if usr.ID > 0 { //用户名已注册
-		return &UserRegisterResponse{1, "用户名已存在", 0, ""}, errors.New("用户名已存在")
+		return &handlers.UserRegisterResponse{StatusCode: 1, StatusMsg: "用户名已存在"}, errors.New("用户名已存在")
 	} else {
 		//创建用户
 		saltPassword, err := utils.HashAndSalt(password)
 		if err != nil {
-			return &UserRegisterResponse{
-				1,
-				"加密失败",
-				0,
-				"",
+			return &handlers.UserRegisterResponse{
+				StatusCode: 1,
+				StatusMsg:  "加密失败",
 			}, err
 		}
 		db.DB.WithContext(c).Create(&db.User{UserName: username, PassWord: saltPassword, FollowCount: 0, FollowerCount: 0})
@@ -122,18 +112,15 @@ func (this *UserServiceImpl) RegisterUser(c context.Context, username string, pa
 		tokenString, err := this.GetToken(&u)
 		if err != nil {
 			db.DB.WithContext(c).Delete(&u)
-			return &UserRegisterResponse{
-				1,
-				"token获取失败",
-				0,
-				"",
+			return &handlers.UserRegisterResponse{
+				StatusCode: 1,
+				StatusMsg:  "token获取失败",
 			}, err
 		}
-		return &UserRegisterResponse{
-			0,
-			"用户创建成功",
-			int64(u.ID),
-			tokenString,
+		return &handlers.UserRegisterResponse{
+			StatusMsg: "用户创建成功",
+			UserId:    int64(u.ID),
+			Token:     tokenString,
 		}, nil
 	}
 }
@@ -141,10 +128,10 @@ func (this *UserServiceImpl) RegisterUser(c context.Context, username string, pa
 func (this *UserServiceImpl) CheckPassword(password string) error {
 	length := len(password)
 	if length == 0 {
-		return errors.New("密码不能为空")
+		return errno.ParamErr.WithMessage("密码不能为空")
 	}
 	if length > constants.MaxPasswordlength {
-		return errors.New("密码长度过长")
+		return errno.ParamErr.WithMessage("密码长度过长")
 	}
 	return nil
 }
@@ -187,8 +174,9 @@ func (this *UserServiceImpl) GetUserFollowers(ctx context.Context, ID int64) ([]
 		return nil, err
 	}
 	//结构体转换
-	infos := make([]handlers.UserInfo, len(followers))
+	infos := make([]handlers.UserInfo, 0)
 	for i := 0; i < len(followers); i++ {
+		fmt.Println(followers[i])
 		userInfo := &handlers.UserInfo{
 			ID:            int64(followers[i].ID),
 			UserName:      followers[i].UserName,
@@ -209,13 +197,10 @@ func (this *UserServiceImpl) GetUserFans(ctx context.Context, ID int64) ([]handl
 		return nil, err
 	}
 	//结构体转换
-	infos := make([]handlers.UserInfo, len(fans))
+	infos := make([]handlers.UserInfo, 0)
 	for i := 0; i < len(fans); i++ {
 		//1、查询当前用户是否关注对方用户
-		isFollow, err := db.IsFollow(ctx, ID, int64(fans[i].ID))
-		if err != nil {
-			return nil, err
-		}
+		isFollow, _ := db.IsFollow(ctx, ID, int64(fans[i].ID))
 
 		userInfo := &handlers.UserInfo{
 			ID:            int64(fans[i].ID),
@@ -232,13 +217,15 @@ func (this *UserServiceImpl) GetUserFans(ctx context.Context, ID int64) ([]handl
 }
 
 func (this *UserServiceImpl) FollowUser(ctx context.Context, userId int64, followUserId int64) error {
-	//1、关注粉丝表（Follow表）中创建新数据
-	err := db.CreatFollow(ctx, userId, followUserId)
+	flag, err := db.IsFollow(ctx, userId, followUserId)
+	if flag { // 已关注，直接返回
+		return nil
+	}
+	err = db.CreateFollow(ctx, userId, followUserId)
 	if err != nil {
 		return err
 	}
-	//TODO 2、redis缓存数据修改
-	//TODO 3、用户表（user表）关注者userId关注数增加、被关注者followUserId粉丝数增加
+	//TODO 2、用户表（user表）关注者userId关注数增加、被关注者followUserId粉丝增加
 	return nil
 }
 
@@ -248,7 +235,6 @@ func (this *UserServiceImpl) CancelFollowUser(ctx context.Context, userId int64,
 	if err != nil {
 		return err
 	}
-	//TODO 2、redis缓存数据修改
-	//TODO 3、用户表（user表）关注者userId关注数减少、被关注者followUserId粉丝数减少
+	//TODO 2、用户表（user表）关注者userId关注数减少、被关注者followUserId粉丝数减少
 	return nil
 }

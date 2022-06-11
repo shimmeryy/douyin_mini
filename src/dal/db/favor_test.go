@@ -71,7 +71,6 @@ func TestQueryFavorByUserId(t *testing.T) {
 			for _, tmp := range res {
 				fmt.Println(tmp)
 			}
-
 		})
 	}
 }

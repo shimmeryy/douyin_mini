@@ -36,7 +36,7 @@ func Publish(c *gin.Context) {
 	})
 }
 
-//PublishList 发布列表
+// PublishList 发布列表
 func PublishList(c *gin.Context) {
 	//claims := jwt.ExtractClaims(c)
 	//userID := int64(claims[constants.IdentityKey].(float64))

@@ -11,6 +11,7 @@ import (
 	"tiktok/src/utils/jwt"
 )
 
+// CommentAction 评论或取消评论
 func CommentAction(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	userID := int64(claims[constants.IdentityKey].(float64))
@@ -66,6 +67,7 @@ func CommentAction(c *gin.Context) {
 	}
 }
 
+// CommentList 获取评论列表
 func CommentList(c *gin.Context) {
 	videoId, err := strconv.ParseInt(c.Query("video_id"), 10, 64)
 	if err != nil {

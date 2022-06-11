@@ -7,7 +7,7 @@ import (
 
 func TestCreatFollow(t *testing.T) {
 	Init()
-	err := CreatFollow(nil, 1, 2)
+	err := CreateFollow(nil, 1, 2)
 	if err != nil {
 		return
 	}

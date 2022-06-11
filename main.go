@@ -73,14 +73,15 @@ func InitRouter(r *gin.Engine) {
 		comment.POST("/action/", controller.CommentAction)
 		comment.GET("/list/", controller.CommentList)
 	}
+	relation := apiRouter.Group("/relation")
+	{
+		relation.Use(config.AuthMiddleware.MiddlewareFunc())
+		relation.POST("/action/", controller.RelationAction)
+		relation.GET("/follow/list/", controller.FollowList)
+		relation.GET("/follower/list/", controller.FollowerList)
+	}
 	// basic apis
 	apiRouter.GET("/feed/", controller.Feed) //feed流接口
-
-	//
-	//// extra apis - II
-	//apiRouter.POST("/relation/action/", controller.RelationAction)     //关注用户
-	//apiRouter.GET("/relation/follow/list/", controller.FollowList)     //关注列表
-	//apiRouter.GET("/relation/follower/list/", controller.FollowerList) //粉丝列表
 }
 
 func InitAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
@@ -143,7 +144,7 @@ func InitAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 	return authMiddleware, nil
 }
 
-//全局异常捕捉插件
+// RecoverMiddleware 全局异常捕捉插件
 func RecoverMiddleware(c *gin.Context) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -158,8 +159,8 @@ func RecoverMiddleware(c *gin.Context) {
 			}
 			//封装通用JSON返回
 			c.JSON(http.StatusOK, gin.H{
-				"code": err.ErrCode,
-				"msg":  err.ErrMsg,
+				"status_code": err.ErrCode,
+				"status_msg":  err.ErrMsg,
 			})
 			//终止后续接口调用，不加的话recover到异常后，还会继续执行接口里后续代码
 			c.Abort()

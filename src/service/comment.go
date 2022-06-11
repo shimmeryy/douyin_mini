@@ -11,6 +11,8 @@ import (
 type CommentService interface {
 	CreateComment()
 	QueryCommentByVideoId()
+	QueryCommentById()
+	CountCommentByVideoId()
 }
 
 var (

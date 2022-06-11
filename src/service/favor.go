@@ -10,9 +10,11 @@ import (
 )
 
 type FavorService interface {
-}
-
-type FavorServiceImpl struct {
+	OperateFavor()
+	QueryFavorByUserId()
+	QueryFavorVideoByUserId()
+	CountFavorByVideoId()
+	CheckIsFavored()
 }
 
 var (
@@ -26,6 +28,9 @@ func FavorServiceInstance() *FavorServiceImpl {
 			favorService = &FavorServiceImpl{}
 		})
 	return favorService
+}
+
+type FavorServiceImpl struct {
 }
 
 // OperateFavor 点赞或取消点赞

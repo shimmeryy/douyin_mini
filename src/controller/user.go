@@ -4,17 +4,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"tiktok/src/constants"
 	"tiktok/src/errno"
 	"tiktok/src/handlers"
 	"tiktok/src/service"
+	"tiktok/src/utils/jwt"
 )
 
-//Register User Register
+// Register 新用户注册
 func Register(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
-	print("%#v,%#v", username, password)
 	userService := service.UserServiceInstance()
 
 	response, err := userService.RegisterUser(c, username, password)
@@ -25,11 +26,7 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, &response)
 }
 
-//Login User Login
-//func Login(c *gin.Context) {
-//}
-
-//UserInfo Get UserInfo
+// GetUserInfo 获取用户信息
 func GetUserInfo(c *gin.Context) {
 	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	if err != nil {
@@ -48,80 +45,87 @@ func GetUserInfo(c *gin.Context) {
 	})
 }
 
-func GetFollowersInfo(ctx *gin.Context) {
-	userId, err := strconv.ParseInt(ctx.Query("user_id"), 10, 64)
+// FollowList 获取关注列表
+func FollowList(c *gin.Context) {
+	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	if err != nil {
-		panic(errno.ServiceErr.WithMessage("参数ID有误"))
+		panic(errno.ParamErr.WithMessage("invalid UserId"))
 	}
 
-	followers, err := service.UserServiceInstance().GetUserFollowers(ctx, userId)
+	if flag := service.UserServiceInstance().CheckUserById(c, userId); flag != true {
+		panic(errno.ParamErr.WithMessage("invalid UserId"))
+	}
+
+	followers, err := service.UserServiceInstance().GetUserFollowers(c, userId)
 	if err != nil {
 		panic(errno.ServiceErr.WithMessage(err.Error()))
 	}
-	ctx.JSON(http.StatusOK, &handlers.UserFollowersResponse{
+	c.JSON(http.StatusOK, &handlers.UserFollowersResponse{
 		Response: handlers.Response{
-			StatusCode: 200,
+			StatusCode: 0,
 			StatusMsg:  "成功",
 		},
 		Followers: followers,
 	})
 }
 
-func GetFansInfo(ctx *gin.Context) {
-	userId, err := strconv.ParseInt(ctx.Query("user_id"), 10, 64)
+// FollowerList 获取粉丝列表
+func FollowerList(c *gin.Context) {
+	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	if err != nil {
-		panic(errno.ServiceErr.WithMessage("参数ID有误"))
+		panic(errno.ParamErr.WithMessage("invalid UserId"))
 	}
 
-	fans, err := service.UserServiceInstance().GetUserFans(ctx, userId)
+	if flag := service.UserServiceInstance().CheckUserById(c, userId); flag != true {
+		panic(errno.ParamErr.WithMessage("invalid UserId"))
+	}
+
+	fans, err := service.UserServiceInstance().GetUserFans(c, userId)
 	if err != nil {
 		panic(errno.ServiceErr.WithMessage(err.Error()))
 	}
-	ctx.JSON(http.StatusOK, &handlers.UserFansResponse{
+	c.JSON(http.StatusOK, &handlers.UserFansResponse{
 		Response: handlers.Response{
-			StatusCode: 200,
+			StatusCode: 0,
 			StatusMsg:  "成功",
 		},
 		Fans: fans,
 	})
 }
 
-func FollowUser(ctx *gin.Context) {
-	userId, err := strconv.ParseInt(ctx.Query("user_id"), 10, 64)
+// RelationAction 关注或取关用户
+func RelationAction(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+	userId := int64(claims[constants.IdentityKey].(float64))
+
+	followUserId, err := strconv.ParseInt(c.Query("to_user_id"), 10, 64)
 	if err != nil {
-		panic(errno.ServiceErr.WithMessage("参数ID有误"))
-	}
-	followUserId, err := strconv.ParseInt(ctx.Query("follow_user_id"), 10, 64)
-	if err != nil {
-		panic(errno.ServiceErr.WithMessage("参数ID有误"))
+		panic(errno.ParamErr.WithMessage("invalid FollowUserId"))
 	}
 
-	err = service.UserServiceInstance().FollowUser(ctx, userId, followUserId)
-	if err != nil {
-		panic(errno.ServiceErr.WithMessage(err.Error()))
-	}
-	ctx.JSON(http.StatusOK, &handlers.Response{
-		StatusCode: 200,
-		StatusMsg:  "成功",
-	})
-}
-
-func CancelFollowUser(ctx *gin.Context) {
-	userId, err := strconv.ParseInt(ctx.Query("user_id"), 10, 64)
-	if err != nil {
-		panic(errno.ServiceErr.WithMessage("参数ID有误"))
-	}
-	followUserId, err := strconv.ParseInt(ctx.Query("follow_user_id"), 10, 64)
-	if err != nil {
-		panic(errno.ServiceErr.WithMessage("参数ID有误"))
+	if userId == followUserId {
+		panic(errno.ParamErr.WithMessage("can't follow yourself!"))
 	}
 
-	err = service.UserServiceInstance().CancelFollowUser(ctx, userId, followUserId)
-	if err != nil {
-		panic(errno.ServiceErr.WithMessage(err.Error()))
+	actionType, err := strconv.ParseInt(c.Query("action_type"), 10, 64)
+	if err != nil || (actionType != 1 && actionType != 2) {
+		panic(errno.ParamErr.WithMessage("invalid actionType"))
 	}
-	ctx.JSON(http.StatusOK, &handlers.Response{
-		StatusCode: 200,
-		StatusMsg:  "成功",
+
+	if actionType == 1 {
+		err := service.UserServiceInstance().FollowUser(c, userId, followUserId)
+		if err != nil {
+			panic(errno.ServiceErr.WithMessage(err.Error()))
+		}
+	} else {
+		err := service.UserServiceInstance().CancelFollowUser(c, userId, followUserId)
+		if err != nil {
+			panic(errno.ServiceErr.WithMessage(err.Error()))
+		}
+	}
+
+	c.JSON(http.StatusOK, &handlers.Response{
+		StatusCode: 0,
+		StatusMsg:  "success",
 	})
 }

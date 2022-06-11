@@ -11,6 +11,7 @@ import (
 	"tiktok/src/utils/jwt"
 )
 
+// FavoriteAction 点赞或取消点赞
 func FavoriteAction(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	userID := int64(claims[constants.IdentityKey].(float64))
@@ -40,6 +41,7 @@ func FavoriteAction(c *gin.Context) {
 	})
 }
 
+// FavoriteList 获取点赞列表
 func FavoriteList(c *gin.Context) {
 	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	if err != nil {

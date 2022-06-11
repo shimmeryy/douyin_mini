@@ -1,6 +1,5 @@
 package handlers
 
-//登录
 type UserLoginParam struct {
 	UserName string `json:"username" form:"username" `
 	PassWord string `json:"password" form:"password"`
@@ -27,10 +26,17 @@ type UserInfo struct {
 
 type UserFollowersResponse struct {
 	Response
-	Followers []UserInfo `json:"followers"`
+	Followers []UserInfo `json:"user_list"`
 }
 
 type UserFansResponse struct {
 	Response
-	Fans []UserInfo `json:"fans"`
+	Fans []UserInfo `json:"user_list"`
+}
+
+type UserRegisterResponse struct {
+	StatusCode int32  `json:"status_code"`
+	StatusMsg  string `json:"status_msg,omitempty"`
+	UserId     int64  `json:"user_id"`
+	Token      string `json:"token"`
 }

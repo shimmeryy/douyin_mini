@@ -99,6 +99,40 @@ func TestQueryFavorByUserId(t *testing.T) {
 	}
 }
 
+func TestQueryFavorVideoByUserId(t *testing.T) {
+	dal.Init()
+	type argument struct {
+		ctx context.Context
+		req handlers.FavorQueryParam
+	}
+	tests := []struct {
+		name    string
+		args    argument
+		wantErr bool
+	}{
+		{
+			name: "1", args: argument{
+				ctx: context.Background(),
+				req: handlers.FavorQueryParam{
+					UserId: 1,
+				},
+			}, wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := FavorServiceInstance().QueryFavorVideoByUserId(tt.args.ctx, tt.args.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("QueryFavorVideoByUserId() error = %v, wantErr = %v", err, tt.wantErr)
+			}
+			for _, tmp := range res {
+				fmt.Println(tmp)
+			}
+		})
+	}
+}
+
 func TestCountFavorByVideoId(t *testing.T) {
 	dal.Init()
 	type argument struct {

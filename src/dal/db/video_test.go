@@ -20,11 +20,10 @@ func TestCreateVideo(t *testing.T) {
 		{name: "1", args: args{
 			ctx: context.Background(),
 			video: Video{
-				AuthorId:     1,
-				PlayUrl:      "this is a test",
-				CoverUrl:     "this is a test",
-				CommentCount: 0,
-				Title:        "this is a test",
+				AuthorId: 1,
+				PlayUrl:  "this is a test",
+				CoverUrl: "this is a test",
+				Title:    "this is a test",
 			},
 		}, wantErr: false},
 	}

@@ -8,10 +8,10 @@ import (
 	"tiktok/src/handlers"
 )
 
-func TestCheckUser(t *testing.T)  {
+func TestCheckUser(t *testing.T) {
 	dal.Init()
 	type argument struct {
-		ctx     context.Context
+		ctx context.Context
 		req handlers.UserLoginParam
 	}
 	tests := []struct {
@@ -21,28 +21,28 @@ func TestCheckUser(t *testing.T)  {
 	}{
 		{
 			name: "1", args: argument{
-			ctx: context.Background(),
-			req: handlers.UserLoginParam{
-				UserName: "changlu",
-				PassWord: "123456",
-			},
-		}, wantErr: false},
+				ctx: context.Background(),
+				req: handlers.UserLoginParam{
+					UserName: "changlu",
+					PassWord: "123456",
+				},
+			}, wantErr: false},
 		{
 			name: "2", args: argument{
-			ctx: context.Background(),
-			req: handlers.UserLoginParam{
-				UserName: "changlu",
-				PassWord: "12345",
-			},
-		}, wantErr: false},
+				ctx: context.Background(),
+				req: handlers.UserLoginParam{
+					UserName: "changlu",
+					PassWord: "12345",
+				},
+			}, wantErr: false},
 		{
 			name: "3", args: argument{
-			ctx: context.Background(),
-			req: handlers.UserLoginParam{
-				UserName: "changlu1",
-				PassWord: "123456",
-			},
-		}, wantErr: false},
+				ctx: context.Background(),
+				req: handlers.UserLoginParam{
+					UserName: "changlu1",
+					PassWord: "123456",
+				},
+			}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -55,11 +55,11 @@ func TestCheckUser(t *testing.T)  {
 	}
 }
 
-func TestGetUserInfo(t *testing.T)  {
+func TestGetUserInfo(t *testing.T) {
 	dal.Init()
 	type argument struct {
-		ctx     context.Context
-		ID int64
+		ctx context.Context
+		ID  int64
 	}
 	tests := []struct {
 		name    string
@@ -68,14 +68,14 @@ func TestGetUserInfo(t *testing.T)  {
 	}{
 		{
 			name: "1", args: argument{
-			ctx: context.Background(),
-			ID: 1,
-		}, wantErr: false},
+				ctx: context.Background(),
+				ID:  1,
+			}, wantErr: false},
 		{
 			name: "2", args: argument{
-			ctx: context.Background(),
-			ID: 2,
-		}, wantErr: false},
+				ctx: context.Background(),
+				ID:  2,
+			}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -91,8 +91,8 @@ func TestGetUserInfo(t *testing.T)  {
 func TestCheckUserById(t *testing.T) {
 	dal.Init()
 	type argument struct {
-		ctx     context.Context
-		ID int64
+		ctx context.Context
+		ID  int64
 	}
 	tests := []struct {
 		name    string
@@ -101,14 +101,14 @@ func TestCheckUserById(t *testing.T) {
 	}{
 		{
 			name: "1", args: argument{
-			ctx: context.Background(),
-			ID: 1,
-		}, wantErr: false},
+				ctx: context.Background(),
+				ID:  1,
+			}, wantErr: false},
 		{
 			name: "2", args: argument{
-			ctx: context.Background(),
-			ID: 2,
-		}, wantErr: false},
+				ctx: context.Background(),
+				ID:  2,
+			}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -117,4 +117,3 @@ func TestCheckUserById(t *testing.T) {
 		})
 	}
 }
-
