@@ -11,16 +11,16 @@ import (
 	"tiktok/src/utils/jwt"
 )
 
-func Action(c *gin.Context) {
+func FavoriteAction(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
 	userID := int64(claims[constants.IdentityKey].(float64))
 
-	videoId, err := strconv.ParseInt(c.PostForm("video_id"), 10, 64)
+	videoId, err := strconv.ParseInt(c.Query("video_id"), 10, 64)
 	if err != nil {
 		panic(errno.ParamErr.WithMessage("Error VideoId"))
 	}
 
-	actionType, err := strconv.ParseInt(c.PostForm("action_type"), 10, 32)
+	actionType, err := strconv.ParseInt(c.Query("action_type"), 10, 32)
 	if err != nil {
 		panic(errno.ParamErr.WithMessage("Error ActionType"))
 	}
@@ -40,7 +40,23 @@ func Action(c *gin.Context) {
 	})
 }
 
-//func List(c *gin.Context) {
-//	userId := c.Query("user_id")
-//
-//}
+func FavoriteList(c *gin.Context) {
+	userId, err := strconv.ParseInt(c.Query("user_id"), 10, 64)
+	if err != nil {
+		panic(errno.ParamErr.WithMessage("Error UserId"))
+	}
+
+	videoList, err := service.FavorServiceInstance().QueryFavorVideoByUserId(c, handlers.FavorQueryParam{UserId: userId})
+	if err != nil {
+		panic(errno.ServiceErr.WithMessage(err.Error()))
+	}
+
+	c.JSON(http.StatusOK, handlers.FavorQueryResponse{
+		Response: handlers.Response{
+			StatusCode: 0,
+			StatusMsg:  "success",
+		},
+		VideoList: videoList,
+	})
+
+}

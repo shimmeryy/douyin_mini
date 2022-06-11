@@ -7,13 +7,13 @@ import (
 )
 
 func Test_Config(t *testing.T) {
-	init()
+	Init()
 	fmt.Println(AppConfig)
 	err := errors.New("123")
 	test01(err)
 }
 
-func init() {
+func Init() {
 
 }
 

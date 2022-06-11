@@ -66,7 +66,7 @@ func Feed(c *gin.Context) {
 		if err != nil {
 			panic(errno.ServiceErr.WithMessage(err.Error()))
 		}
-		commentCount, err := service.CommentServiceInstance().CountCommentByVideoId(c, handlers.CommentQueryParam{VideoId: videoId})
+		commentCount, err := service.CommentServiceInstance().CountCommentByVideoId(c, handlers.CommentQueryByVideoIdParam{VideoId: videoId})
 		if err != nil {
 			panic(errno.ServiceErr.WithMessage(err.Error()))
 		}

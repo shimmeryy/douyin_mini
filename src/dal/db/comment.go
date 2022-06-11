@@ -25,12 +25,34 @@ func QueryCommentByVideoId(ctx context.Context, videoId int64) ([]*Comment, erro
 	return res, nil
 }
 
-// CreateCommentInfo 创建新的评论信息
-func CreateCommentInfo(ctx context.Context, comment Comment) error {
-	if err := DB.WithContext(ctx).Create(&comment).Error; err != nil {
-		return err
+// QueryCommentById 根据commentId查询评论详情
+func QueryCommentById(ctx context.Context, commentId int64) (*Comment, error) {
+	var res *Comment
+	if err := DB.WithContext(ctx).Where("id = ?", commentId).Find(&res).Error; err != nil {
+		return nil, err
 	}
-	return nil
+	return res, nil
+}
+
+// CheckCommentById 根据commentId检查是否存在
+func CheckCommentById(ctx context.Context, commentId int64) (bool, error) {
+	var cnt int64
+	if err := DB.WithContext(ctx).Where("id = ?", commentId).Count(&cnt).Error; err != nil {
+		return false, err
+	}
+	if cnt != 0 {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+// CreateCommentInfo 创建新的评论信息
+func CreateCommentInfo(ctx context.Context, comment Comment) (int64, error) {
+	if err := DB.WithContext(ctx).Create(&comment).Error; err != nil {
+		return -1, err
+	}
+	return int64(comment.ID), nil
 }
 
 // DeleteCommentInfo 根据commentId删除评论

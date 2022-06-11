@@ -66,8 +66,8 @@ func (this *VideoServiceImpl) GetVideosByAuthor(ctx context.Context, userId int6
 }
 
 // GetVideoById 根据id获取Video
-func (this *VideoServiceImpl) GetVideoById(ctx context.Context, id int64) (videoInfo *handlers.VideoInfo, err error) {
-	video, err := db.QueryVideoById(ctx, id)
+func (this *VideoServiceImpl) GetVideoById(ctx context.Context, videoId int64, userId int64) (videoInfo *handlers.VideoInfo, err error) {
+	video, err := db.QueryVideoById(ctx, videoId)
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +79,24 @@ func (this *VideoServiceImpl) GetVideoById(ctx context.Context, id int64) (video
 		return nil, errno.ServiceErr.WithMessage("用户不存在")
 	}
 
+	commentCount, err := CommentServiceInstance().CountCommentByVideoId(ctx, handlers.CommentQueryByVideoIdParam{VideoId: videoId})
+	if err != nil {
+		panic(errno.ServiceErr.WithMessage(err.Error()))
+	}
+
+	favorCount, err := FavorServiceInstance().CountFavorByVideoId(ctx, handlers.FavorCountParam{VideoId: videoId})
+	if err != nil {
+		panic(errno.ServiceErr.WithMessage(err.Error()))
+	}
+
+	isFavorite, err := FavorServiceInstance().CheckIsFavored(ctx, handlers.FavorCheckParam{
+		UserId:  userId,
+		VideoId: videoId,
+	})
+	if err != nil {
+		panic(errno.ServiceErr.WithMessage(err.Error()))
+	}
+
 	videoInfo = &handlers.VideoInfo{
 		ID: int64(video.ID),
 		Author: handlers.UserInfo{
@@ -88,10 +106,14 @@ func (this *VideoServiceImpl) GetVideoById(ctx context.Context, id int64) (video
 			FollowerCount: user.FollowerCount,
 			IsFollow:      false,
 		},
-		PlayUrl:  video.PlayUrl,
-		CoverUrl: video.CoverUrl,
-		Title:    video.Title,
+		PlayUrl:       video.PlayUrl,
+		CoverUrl:      video.CoverUrl,
+		Title:         video.Title,
+		FavoriteCount: favorCount,
+		CommentCount:  commentCount,
+		IsFavorite:    isFavorite,
 	}
+
 	return videoInfo, nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sync"
 	"tiktok/src/dal/db"
+	"tiktok/src/errno"
 	"tiktok/src/handlers"
 )
 
@@ -31,12 +32,16 @@ func FavorServiceInstance() *FavorServiceImpl {
 func (this *FavorServiceImpl) OperateFavor(ctx context.Context, req handlers.FavorOperateParam) error {
 	// check UserId is valid or not
 	if flag := UserServiceInstance().CheckUserById(ctx, req.UserId); flag != true {
-		return errors.New("invalid userId")
+		return errno.ServiceErr.WithMessage("invalid userId")
 	}
 
 	// check VideoId is valid or not
 	if flag := VideoServiceInstance().CheckVideoById(ctx, req.VideoId); flag != true {
-		return errors.New("invalid videoId")
+		return errno.ServiceErr.WithMessage("invalid videoId")
+	}
+
+	if req.ActionType != 1 && req.ActionType != 2 {
+		return errno.ServiceErr.WithMessage("invalid actionType")
 	}
 
 	// req.ActionType == 2 取消点赞
@@ -48,6 +53,17 @@ func (this *FavorServiceImpl) OperateFavor(ctx context.Context, req handlers.Fav
 	}
 
 	// req.ActionType == 1 点赞
+	flag, err := this.CheckIsFavored(ctx, handlers.FavorCheckParam{
+		UserId:  req.UserId,
+		VideoId: req.VideoId,
+	})
+	if err != nil {
+		return err
+	}
+	// 如果已经点赞过了那么直接返回
+	if flag {
+		return nil
+	}
 	favor := db.Favor{
 		UserId:  req.UserId,
 		VideoId: req.VideoId,
@@ -68,24 +84,23 @@ func (this *FavorServiceImpl) QueryFavorByUserId(ctx context.Context, req handle
 	return res, nil
 }
 
-// TODO 根据用户id获取点赞视频详情
 // QueryFavorVideoByUserId 根据用户id获取点赞视频详情
-//func (this *FavorServiceImpl) QueryFavorVideoByUserId(ctx context.Context, req handlers.FavorQueryParam) ([]*db.Video, error) {
-//	tmp, err := this.QueryFavorByUserId(ctx, req)
-//	if err != nil {
-//		return nil, err
-//	}
-//	var res []*db.Video
-//	for _, favor := range tmp {
-//		videoId := favor.VideoId
-//		video, err := VideoServiceInstance().GetVideoById(ctx, videoId)
-//		if err != nil {
-//			return nil, err
-//		}
-//		res = append(res, &video)
-//	}
-//
-//}
+func (this *FavorServiceImpl) QueryFavorVideoByUserId(ctx context.Context, req handlers.FavorQueryParam) ([]*handlers.VideoInfo, error) {
+	list, err := this.QueryFavorByUserId(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	var res []*handlers.VideoInfo
+	for _, favor := range list {
+		videoId := favor.VideoId
+		video, err := VideoServiceInstance().GetVideoById(ctx, videoId, req.UserId)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, video)
+	}
+	return res, nil
+}
 
 func (this *FavorServiceImpl) CountFavorByVideoId(ctx context.Context, req handlers.FavorCountParam) (int64, error) {
 	if flag := VideoServiceInstance().CheckVideoById(ctx, req.VideoId); flag != true {
@@ -94,7 +109,7 @@ func (this *FavorServiceImpl) CountFavorByVideoId(ctx context.Context, req handl
 
 	count, err := db.CountFavorByVideoId(ctx, req.VideoId)
 	if err != nil {
-		return -1, errors.New("error occurs countFavorByVideoId")
+		return -1, errno.ServiceErr.WithMessage("error occurs countFavorByVideoId")
 	}
 	return count, nil
 }
@@ -105,7 +120,7 @@ func (this *FavorServiceImpl) CheckIsFavored(ctx context.Context, req handlers.F
 	}
 
 	if flag := VideoServiceInstance().CheckVideoById(ctx, req.VideoId); flag != true {
-		return false, errors.New("invalid videoId")
+		return false, errno.ServiceErr.WithMessage("invalid videoId")
 	}
 
 	res, err := db.CheckIsFavored(ctx, req.UserId, req.VideoId)

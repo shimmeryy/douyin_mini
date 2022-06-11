@@ -5,8 +5,8 @@ import (
 )
 
 type ErrNo struct {
-	ErrCode int64
-	ErrMsg  string
+	ErrCode int64  `json:"status_code"`
+	ErrMsg  string `json:"status_msg"`
 }
 
 func (e ErrNo) Error() string {

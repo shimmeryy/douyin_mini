@@ -73,7 +73,7 @@ func TestQueryCommentByVideoId(t *testing.T) {
 	dal.Init()
 	type argument struct {
 		ctx context.Context
-		req handlers.CommentQueryParam
+		req handlers.CommentQueryByVideoIdParam
 	}
 	tests := []struct {
 		name    string
@@ -83,7 +83,7 @@ func TestQueryCommentByVideoId(t *testing.T) {
 		{
 			name: "1", args: argument{
 				ctx: context.Background(),
-				req: handlers.CommentQueryParam{
+				req: handlers.CommentQueryByVideoIdParam{
 					VideoId: 10,
 				},
 			}, wantErr: false,
@@ -108,7 +108,7 @@ func TestCountCommentByVideoId(t *testing.T) {
 	dal.Init()
 	type argument struct {
 		ctx context.Context
-		req handlers.CommentQueryParam
+		req handlers.CommentQueryByVideoIdParam
 	}
 	tests := []struct {
 		name    string
@@ -118,7 +118,7 @@ func TestCountCommentByVideoId(t *testing.T) {
 		{
 			name: "1", args: argument{
 				ctx: context.Background(),
-				req: handlers.CommentQueryParam{
+				req: handlers.CommentQueryByVideoIdParam{
 					VideoId: 10,
 				},
 			}, wantErr: false,
@@ -126,7 +126,7 @@ func TestCountCommentByVideoId(t *testing.T) {
 		{
 			name: "2", args: argument{
 				ctx: context.Background(),
-				req: handlers.CommentQueryParam{
+				req: handlers.CommentQueryByVideoIdParam{
 					VideoId: 9999,
 				},
 			}, wantErr: false,

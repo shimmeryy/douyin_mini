@@ -1,7 +1,5 @@
 package handlers
 
-import "tiktok/src/dal/db"
-
 type FavorOperateParam struct {
 	UserId     int64 `json:"user_id"`
 	VideoId    int64 `json:"video_id"`
@@ -14,7 +12,7 @@ type FavorQueryParam struct {
 
 type FavorQueryResponse struct {
 	Response
-	VideoList []*db.Video
+	VideoList []*VideoInfo `json:"video_list"`
 }
 
 type FavorCountParam struct {

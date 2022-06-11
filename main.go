@@ -61,15 +61,21 @@ func InitRouter(r *gin.Engine) {
 		publish.POST("/action/", controller.Publish)  //发布视频
 		publish.GET("/list/", controller.PublishList) //发布列表
 	}
+	favorite := apiRouter.Group("/favorite")
+	{
+		favorite.Use(config.AuthMiddleware.MiddlewareFunc())
+		favorite.POST("/action/", controller.FavoriteAction)
+		favorite.GET("/list/", controller.FavoriteList)
+	}
+	comment := apiRouter.Group("/comment")
+	{
+		comment.Use(config.AuthMiddleware.MiddlewareFunc())
+		comment.POST("/action/", controller.CommentAction)
+		comment.GET("/list/", controller.CommentList)
+	}
 	// basic apis
 	apiRouter.GET("/feed/", controller.Feed) //feed流接口
 
-	//
-	//// extra apis - I
-	//apiRouter.POST("/favorite/action/", controller.FavoriteAction) //点赞
-	//apiRouter.GET("/favorite/list/", controller.FavoriteList)      //查看喜欢列表
-	//apiRouter.POST("/comment/action/", controller.CommentAction)   //评论
-	//apiRouter.GET("/comment/list/", controller.CommentList)        //查看评论列表
 	//
 	//// extra apis - II
 	//apiRouter.POST("/relation/action/", controller.RelationAction)     //关注用户
