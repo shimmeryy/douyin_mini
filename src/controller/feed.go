@@ -18,9 +18,6 @@ func Feed(c *gin.Context) {
 	// latestTime
 	var lastTime int64
 	//token
-	//claims := jwtUitl.ExtractClaims(c)
-	//fmt.Printf("%+v", claims)
-
 	tokenString := c.Query("token")
 	var userID int64
 	if token, err := config.AuthMiddleware.ParseTokenString(tokenString); err == nil {
@@ -54,17 +51,21 @@ func Feed(c *gin.Context) {
 	feedInfoList := make([]handlers.FeedInfo, len(videoList))
 
 	for i := range videoList {
+
 		videoId := int64(videoList[i].ID)
 		authorInfo, err := service.UserServiceInstance().GetUserInfo(c, videoList[i].AuthorId)
 		if err != nil {
 			panic(errno.ServiceErr.WithMessage(err.Error()))
 		}
-		favored, err := service.FavorServiceInstance().CheckIsFavored(c, handlers.FavorCheckParam{
-			UserId:  userID,
-			VideoId: videoId,
-		})
-		if err != nil {
-			panic(errno.ServiceErr.WithMessage(err.Error()))
+		favored := false
+		if userID != 0 {
+			favored, err = service.FavorServiceInstance().CheckIsFavored(c, handlers.FavorCheckParam{
+				UserId:  userID,
+				VideoId: videoId,
+			})
+			if err != nil {
+				panic(errno.ServiceErr.WithMessage(err.Error()))
+			}
 		}
 		commentCount, err := service.CommentServiceInstance().CountCommentByVideoId(c, handlers.CommentQueryByVideoIdParam{VideoId: videoId})
 		if err != nil {

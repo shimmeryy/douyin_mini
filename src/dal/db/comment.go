@@ -37,7 +37,7 @@ func QueryCommentById(ctx context.Context, commentId int64) (*Comment, error) {
 // CheckCommentById 根据commentId检查是否存在
 func CheckCommentById(ctx context.Context, commentId int64) (bool, error) {
 	var cnt int64
-	if err := DB.WithContext(ctx).Where("id = ?", commentId).Count(&cnt).Error; err != nil {
+	if err := DB.Model(Comment{}).WithContext(ctx).Where("id = ?", commentId).Count(&cnt).Error; err != nil {
 		return false, err
 	}
 	if cnt != 0 {
