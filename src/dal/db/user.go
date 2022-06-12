@@ -34,3 +34,17 @@ func QueryUserById(ctx context.Context, ID int64) (*User, error) {
 	}
 	return res, nil
 }
+
+//UpdateFollowAndFollowerCount 更新用户与关注用户的关注总数与粉丝数
+//示例：两者增加1 num=1；两者减1 num=-1
+func UpdateFollowAndFollowerCount(ctx context.Context, userId int64, followUserId int64, num int64) error {
+	err := DB.WithContext(ctx).Model(&User{}).Where("id = ?", userId).UpdateColumn("follow_count", gorm.Expr("follow_count + ?", num)).Error
+	if err != nil {
+		return err
+	}
+	err = DB.WithContext(ctx).Model(&User{}).Where("id = ?", followUserId).UpdateColumn("follower_count", gorm.Expr("follower_count + ?", num)).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}

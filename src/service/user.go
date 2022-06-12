@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"sync"
 	"tiktok/src/config"
 	"tiktok/src/constants"
@@ -53,23 +54,26 @@ func (this *UserServiceImpl) CheckUser(ctx context.Context, req handlers.UserLog
 }
 
 func (this *UserServiceImpl) GetUserInfo(ctx context.Context, ID int64) (*handlers.UserInfo, error) {
+	claims := jwt.ExtractClaims(ctx.(*gin.Context))
+	userID := int64(claims[constants.IdentityKey].(float64))
 	//1、根据用户id查询用户
-	user, err := db.QueryUserById(ctx, ID)
+	targetUser, err := db.QueryUserById(ctx, ID)
 	if err != nil {
 		return nil, err
 	}
-	if user != nil && user.ID == 0 {
+	if targetUser != nil && targetUser.ID == 0 {
 		return nil, errno.ServiceErr.WithMessage("用户不存在")
 	}
+	//2、查看当前用户是否关注对方
+	isFollow, _ := db.IsFollow(ctx, userID, int64(targetUser.ID))
 	//结构体转换
 	userInfo := &handlers.UserInfo{
-		ID:            int64(user.ID),
-		UserName:      user.UserName,
-		FollowCount:   user.FollowCount,
-		FollowerCount: user.FollowerCount,
-		IsFollow:      false,
+		ID:            int64(targetUser.ID),
+		UserName:      targetUser.UserName,
+		FollowCount:   targetUser.FollowCount,
+		FollowerCount: targetUser.FollowerCount,
+		IsFollow:      isFollow,
 	}
-	//2、todo 查看是否关注对方：根据userID、targetUserId来判断，返回true或者false
 	return userInfo, nil
 }
 
