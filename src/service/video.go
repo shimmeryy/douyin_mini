@@ -12,6 +12,9 @@ import (
 
 type VideoService interface {
 	CreateVideo()
+	GetVideosByAuthor()
+	GetVideoById()
+	CheckVideoById()
 }
 
 var (

@@ -8,7 +8,7 @@ import (
 )
 
 type FeedService interface {
-	CreateVideo()
+	Feed()
 }
 
 var (

@@ -16,7 +16,16 @@ import (
 
 type UserService interface {
 	CreateUser()
-	CheckUser(ctx context.Context, req handlers.UserLoginParam) (uint, error)
+	CheckUser()
+	GetUserInfo()
+	CheckUserById()
+	RegisterUser()
+	CheckPassword()
+	GetToken()
+	GetUserFollowers()
+	GetUserFans()
+	FollowUser()
+	CancelFollowUser()
 }
 
 var (
