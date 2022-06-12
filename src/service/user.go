@@ -63,7 +63,10 @@ func (this *UserServiceImpl) CheckUser(ctx context.Context, req handlers.UserLog
 
 func (this *UserServiceImpl) GetUserInfo(ctx context.Context, ID int64) (*handlers.UserInfo, error) {
 	claims := jwt.ExtractClaims(ctx.(*gin.Context))
-	userID := int64(claims[constants.IdentityKey].(float64))
+	var userID int64
+	if claims[constants.IdentityKey] != nil {
+		userID = int64(claims[constants.IdentityKey].(float64))
+	}
 	//1、根据用户id查询用户
 	targetUser, err := db.QueryUserById(ctx, ID)
 	if err != nil {
