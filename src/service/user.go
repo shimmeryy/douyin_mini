@@ -154,10 +154,7 @@ func (this *UserServiceImpl) CheckPassword(password string) error {
 }
 
 func (this *UserServiceImpl) GetToken(user *db.User) (string, error) {
-	s, _, err := config.AuthMiddleware.TokenGenerator(jwt.MapClaims{
-		// 对应的id
-		constants.IdentityKey: user.ID,
-	})
+	s, _, err := config.AuthMiddleware.TokenGenerator(int64(user.ID))
 	if err != nil {
 		return "", err
 	}
