@@ -15,8 +15,8 @@
   
 ## 项目结构
   本项目采取Controller + Service + DAO 三层架构模式：
-
   ![structure](https://tva1.sinaimg.cn/large/e6c9d24ely1h35qxwshlej207e0xjq44.jpg)
+  
 - config：项目配置（基于viper读取yaml文件）
 - constants：项目中使用到的字符串常量
 - controller：处理接口逻辑
