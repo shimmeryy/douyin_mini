@@ -1,16 +1,12 @@
 server:
-  port: 8080
+  port: 8000
 datasource:
   username: root
-  password: jerry123
+  password: 12345678
   url: tcp(localhost:3306)/tiktok?charset=utf8mb4&parseTime=True&loc=Local
-redis:
-  host: localhost
-  port: 6379
-  password: 524740492
 oss:
-  endPoint : oss-cn-hangzhou.aliyuncs.com
-  accessKeyId : LTAI5tEpSNFxcFEjyCSm3a7b
-  accessKeySecret : CI7WsknlLCfm1pKaKcJDve99LmXh9G
-  bucketName : java2go
-  domain : https://java2go.oss-cn-hangzhou.aliyuncs.com/
+  endPoint: oss-cn-hangzhou.aliyuncs.com
+  accessKeyId: LTAI5tEpSNFxcFEjyCSm3a7b
+  accessKeySecret: CI7WsknlLCfm1pKaKcJDve99LmXh9G
+  bucketName: java2go
+  domain: https://java2go.oss-cn-hangzhou.aliyuncs.com/

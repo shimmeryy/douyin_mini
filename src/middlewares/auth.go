@@ -42,8 +42,8 @@ func InitAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 		//若是身份未认证成功。情况：①登录失败。②token不正确。③权限不足。
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{
-				"code":    code,
-				"message": message,
+				"status_code": code,
+				"status_msg":  message,
 			})
 		},
 		//自定义登录响应内容

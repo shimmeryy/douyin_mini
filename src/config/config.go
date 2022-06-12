@@ -38,7 +38,6 @@ func InitConfig(viperConfig *viper.Viper) {
 type Config struct {
 	Server     Server
 	DataSource DataSource
-	Redis      Redis
 	OSS        OSS
 }
 
@@ -50,12 +49,6 @@ type DataSource struct {
 	UserName string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	Url      string `mapstructure:"url"`
-}
-
-type Redis struct {
-	Host     string `mapstructure:"host"`
-	Port     string `mapstructure:"port"`
-	Password string `mapstructure:"password"`
 }
 
 type OSS struct {

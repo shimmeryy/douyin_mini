@@ -43,4 +43,3 @@ func errorToString(r interface{}) string {
 		return r.(string)
 	}
 }
-

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"sync"
 	"tiktok/src/config"
@@ -98,7 +97,7 @@ func (this *UserServiceImpl) RegisterUser(c context.Context, username string, pa
 	}
 
 	var usr db.User
-	db.DB.WithContext(c).Where("username=?", username).Find(&usr)
+	db.DB.WithContext(c).Where("username = ?", username).Find(&usr)
 	if usr.ID > 0 { //用户名已注册
 		return &handlers.UserRegisterResponse{StatusCode: 1, StatusMsg: "用户名已存在"}, errors.New("用户名已存在")
 	} else {
@@ -110,9 +109,14 @@ func (this *UserServiceImpl) RegisterUser(c context.Context, username string, pa
 				StatusMsg:  "加密失败",
 			}, err
 		}
-		db.DB.WithContext(c).Create(&db.User{UserName: username, PassWord: saltPassword, FollowCount: 0, FollowerCount: 0})
+		db.DB.WithContext(c).Create(&db.User{
+			UserName:      username,
+			PassWord:      saltPassword,
+			FollowCount:   0,
+			FollowerCount: 0,
+		})
 		var u db.User
-		db.DB.WithContext(c).Where("username=?", username).Find(&u)
+		err = db.DB.WithContext(c).Where("username = ?", username).Find(&u).Error
 		tokenString, err := this.GetToken(&u)
 		if err != nil {
 			db.DB.WithContext(c).Delete(&u)
@@ -134,41 +138,21 @@ func (this *UserServiceImpl) CheckPassword(password string) error {
 	if length == 0 {
 		return errno.ParamErr.WithMessage("密码不能为空")
 	}
-	if length > constants.MaxPasswordlength {
+	if length > constants.MaxPasswordLength {
 		return errno.ParamErr.WithMessage("密码长度过长")
 	}
 	return nil
 }
 
-//func (this *UserServiceImpl) GetToken2(user *db.User) (string, error) {
-//	expiresTime := time.Now().Add(7 * 24 * time.Hour)
-//	claims := jwt.StandardClaims{
-//		Audience:  user.UserName,      // 受众
-//		ExpiresAt: expiresTime.Unix(), // 失效时间
-//		Id:        string(user.ID),    // 编号
-//		IssuedAt:  time.Now().Unix(),  // 签发时间
-//		Issuer:    "gin hello",        // 签发人
-//		NotBefore: time.Now().Unix(),  // 生效时间
-//		Subject:   "login",            // 主题
-//	}
-//	var jwtSecret = []byte("jklasdfi.as")
-//	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-//	token, err := tokenClaims.SignedString(jwtSecret)
-//	if err != nil {
-//		return "", err
-//	}
-//	return token, nil
-//}
-
 func (this *UserServiceImpl) GetToken(user *db.User) (string, error) {
 	s, _, err := config.AuthMiddleware.TokenGenerator(jwt.MapClaims{
-		//对应的id
+		// 对应的id
 		constants.IdentityKey: user.ID,
 	})
 	if err != nil {
 		return "", err
 	}
-	return s, err
+	return s, nil
 }
 
 func (this *UserServiceImpl) GetUserFollowers(ctx context.Context, ID int64) ([]handlers.UserInfo, error) {
@@ -180,7 +164,6 @@ func (this *UserServiceImpl) GetUserFollowers(ctx context.Context, ID int64) ([]
 	//结构体转换
 	infos := make([]handlers.UserInfo, 0)
 	for i := 0; i < len(followers); i++ {
-		fmt.Println(followers[i])
 		userInfo := &handlers.UserInfo{
 			ID:            int64(followers[i].ID),
 			UserName:      followers[i].UserName,
@@ -229,16 +212,28 @@ func (this *UserServiceImpl) FollowUser(ctx context.Context, userId int64, follo
 	if err != nil {
 		return err
 	}
-	//TODO 2、用户表（user表）关注者userId关注数增加、被关注者followUserId粉丝增加
+	err = db.UpdateFollowAndFollowerCount(ctx, userId, followUserId, 1)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (this *UserServiceImpl) CancelFollowUser(ctx context.Context, userId int64, followUserId int64) error {
-	//1、关注粉丝表（Follow表）中创建新数据
-	err := db.DeleteFollow(ctx, userId, followUserId)
+	// 1. 已取关，直接返回
+	flag, err := db.IsFollow(ctx, userId, followUserId)
+	if !flag { // 已取关，直接返回
+		return nil
+	}
+	// 2.关注粉丝表（Follow表）中创建新数据
+	err = db.DeleteFollow(ctx, userId, followUserId)
 	if err != nil {
 		return err
 	}
-	//TODO 2、用户表（user表）关注者userId关注数减少、被关注者followUserId粉丝数减少
+	// 3.用户表（user表）关注者userId关注数减少、被关注者followUserId粉丝数减少
+	err = db.UpdateFollowAndFollowerCount(ctx, userId, followUserId, -1)
+	if err != nil {
+		return err
+	}
 	return nil
 }
