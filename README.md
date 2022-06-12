@@ -1,6 +1,9 @@
 # 抖音项目文档
-## 抖音项目接口文档
+## 抖音项目文档
 [抖音极简版API文档](https://www.apifox.cn/apidoc/shared-8cc50618-0da6-4d5e-a398-76f3b8f766c5/api-18345145)
+
+ [抖音极简版详细文档](https://www.apifox.cn/apidoc/shared-8cc50618-0da6-4d5e-a398-76f3b8f766c5/api-18345145) ：包含演示视频、功能展示
+
 ## 技术栈
 - web框架：Gin 
 - jwt认证授权：gin-jwt
